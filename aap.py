@@ -25,7 +25,7 @@ uploaded_file = st.file_uploader(
     type=["jpg", "jpeg", "png"]
 )
 
-if uploaded_file and api_key:
+if uploaded_file:
 
     image = Image.open(uploaded_file)
 
