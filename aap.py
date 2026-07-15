@@ -1,63 +1,115 @@
 import streamlit as st
-from google import genai
+from openai import OpenAI
 from PIL import Image
+import base64
+import io
+import json
 
-st.set_page_config(page_title="Chetak MCQ Maker", page_icon="🐎")
+st.set_page_config(
+    page_title="AI MCQ Quiz Generator",
+    page_icon="📚",
+    layout="wide"
+)
 
-st.title("🐎 Chetak MCQ Maker")
-st.write("Notes ki image upload karke MCQ banaiye.")
+st.title("📚 AI MCQ Quiz Generator")
+st.write("Upload Notes Image and Generate MCQs")
 
-# API Key
 api_key = st.sidebar.text_input(
-    "Gemini API Key",
+    "OpenRouter API Key",
     type="password"
 )
 
-# Image Upload
 uploaded_file = st.file_uploader(
-    "Notes Image Upload Karein",
+    "Upload Notes Image",
     type=["jpg", "jpeg", "png"]
 )
 
-if uploaded_file is not None and api_key:
+if uploaded_file and api_key:
 
     image = Image.open(uploaded_file)
 
-    st.image(image, caption="Uploaded Notes", use_container_width=True)
+    st.image(image, use_container_width=True)
 
-    number = st.slider(
-        "Kitne MCQ Chahiye?",
-        min_value=3,
-        max_value=20,
-        value=5
+    mcq_count = st.slider(
+        "Number of MCQs",
+        5,
+        20,
+        10
     )
 
-    if st.button("✨ MCQ Taiyaar Karein"):
+    if st.button("Generate MCQs"):
 
-        try:
-            client = genai.Client(api_key=api_key)
+        with st.spinner("Generating..."):
 
-            prompt = f"""
-Tum ek expert teacher ho.
+            buffer = io.BytesIO()
+            image.save(buffer, format="PNG")
+            img_base64 = base64.b64encode(
+                buffer.getvalue()
+            ).decode()
 
-Is image ko dhyan se padho aur uske basis par {number} MCQ banao.
-
-Rules:
-- Har question ke 4 options hone chahiye.
-- Sirf ek answer correct ho.
-- Har question ke niche Correct Answer likho.
-- Language Hinglish rakho.
-- Output clean markdown me do.
-"""
-
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[prompt, image]
+            client = OpenAI(
+                api_key=api_key,
+                base_url="https://openrouter.ai/api/v1"
             )
 
-            st.success("✅ MCQ Taiyaar!")
+            prompt = f"""
+Read this notes image carefully.
 
-            st.markdown(response.text)
+Generate exactly {mcq_count} multiple choice questions.
 
-        except Exception as e:
-            st.error(f"Error: {e}")
+Return ONLY valid JSON.
+
+Format:
+
+[
+ {{
+  "question":"....",
+  "options":[
+   "A",
+   "B",
+   "C",
+   "D"
+  ],
+  "answer":"A"
+ }}
+]
+"""
+
+            response = client.chat.completions.create(
+                model="openrouter/auto",
+                messages=[
+                    {
+                        "role":"user",
+                        "content":[
+                            {
+                                "type":"text",
+                                "text":prompt
+                            },
+                            {
+                                "type":"image_url",
+                                "image_url":{
+                                    "url":f"data:image/png;base64,{img_base64}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            )
+
+            output = response.choices[0].message.content
+
+            st.subheader("Generated MCQs")
+
+            st.code(output)
+
+            try:
+                data = json.loads(output)
+
+                st.success("MCQs Generated Successfully")
+
+                st.session_state.mcqs = data
+
+            except Exception:
+
+                st.warning("Model returned non-JSON output.")
+                st.write(output)
