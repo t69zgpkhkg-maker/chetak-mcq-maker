@@ -53,26 +53,36 @@ if uploaded_file and api_key:
             )
 
             prompt = f"""
-Read this notes image carefully.
+इस नोट्स की इमेज को ध्यान से पढ़ो।
 
-Generate exactly {mcq_count} multiple choice questions.
+इसी के आधार पर {mcq_count} MCQ बनाओ।
 
-Return ONLY valid JSON.
+नियम:
+
+1. सभी प्रश्न हिन्दी में हों।
+2. प्रत्येक प्रश्न के 4 विकल्प हों।
+3. केवल एक उत्तर सही हो।
+4. उत्तर A, B, C या D में दो।
+5. कोई व्याख्या मत लिखो।
+6. केवल Valid JSON लौटाओ।
+7. ```json या Markdown का उपयोग मत करो।
 
 Format:
 
 [
- {{
-  "question":"....",
-  "options":[
-   "A",
-   "B",
-   "C",
-   "D"
-  ],
-  "answer":"A"
- }}
+  {{
+    "question":"प्रश्न",
+    "options":[
+      "विकल्प A",
+      "विकल्प B",
+      "विकल्प C",
+      "विकल्प D"
+    ],
+    "answer":"A"
+  }}
 ]
+
+केवल JSON लौटाओ।
 """
 
             response = client.chat.completions.create(
