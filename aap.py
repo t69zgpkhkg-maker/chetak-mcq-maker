@@ -15,10 +15,10 @@ st.set_page_config(
 st.title("📚 AI MCQ Quiz Generator")
 st.write("Upload Notes Image and Generate MCQs")
 
-api_key = st.sidebar.text_input(
-    "OpenRouter API Key",
-    type="password"
-)
+
+    
+    
+
 
 uploaded_file = st.file_uploader(
     "Upload Notes Image",
