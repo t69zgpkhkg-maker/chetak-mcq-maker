@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 from openai import OpenAI
 from PIL import Image
@@ -53,21 +54,21 @@ if uploaded_file and api_key:
             )
 
             prompt = f"""
-इस नोट्स की इमेज को ध्यान से पढ़ो।
+Read this notes image carefully.
 
-इसी के आधार पर {mcq_count} MCQ बनाओ।
+Generate exactly {mcq_count} multiple choice questions.
 
-नियम:
+Rules:
+- Questions must be written in Hindi.
+- Each question must have exactly 4 options.
+- Only one option is correct.
+- The answer must be only A, B, C or D.
+- Return ONLY valid JSON.
+- Do NOT write markdown.
+- Do NOT use ```json.
+- Do NOT explain anything.
 
-1. सभी प्रश्न हिन्दी में हों।
-2. प्रत्येक प्रश्न के 4 विकल्प हों।
-3. केवल एक उत्तर सही हो।
-4. उत्तर A, B, C या D में दो।
-5. कोई व्याख्या मत लिखो।
-6. केवल Valid JSON लौटाओ।
-7. ```json या Markdown का उपयोग मत करो।
-
-Format:
+Return exactly in this format:
 
 [
   {{
@@ -81,8 +82,6 @@ Format:
     "answer":"A"
   }}
 ]
-
-केवल JSON लौटाओ।
 """
 
             response = client.chat.completions.create(
