@@ -107,9 +107,9 @@ Return exactly in this format:
 
             output = response.choices[0].message.content
 
-            st.subheader("Generated MCQs")
+            
 
-            st.code(output)
+            
 
             try:
                 data = json.loads(output)
