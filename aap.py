@@ -125,6 +125,8 @@ Format:
                 st.write(output)
 # ---------------- QUIZ ENGINE ---------------- #
 
+# ---------------- QUIZ ENGINE ---------------- #
+
 if "mcqs" in st.session_state:
 
     st.divider()
@@ -132,6 +134,8 @@ if "mcqs" in st.session_state:
 
     if "current" not in st.session_state:
         st.session_state.current = 0
+
+    if "score" not in st.session_state:
         st.session_state.score = 0
 
     mcqs = st.session_state.mcqs
@@ -140,46 +144,59 @@ if "mcqs" in st.session_state:
 
         q = mcqs[st.session_state.current]
 
+        # Progress Bar
+        progress = st.session_state.current / len(mcqs)
+        st.progress(progress)
+
         st.subheader(
-            f"Question {st.session_state.current+1}/{len(mcqs)}"
+            f"Question {st.session_state.current + 1}/{len(mcqs)}"
         )
 
         st.write(q["question"])
 
         option = st.radio(
-            "Choose Answer",
+            "उत्तर चुनें",
             q["options"],
             key=f"q{st.session_state.current}"
         )
 
-        if st.button("Next"):
+        if st.button("Next ➡️"):
 
-            if option == q["answer"]:
+            correct_option = q["options"][ord(q["answer"]) - 65]
+
+            if option == correct_option:
+                st.success("✅ सही उत्तर")
                 st.session_state.score += 1
+            else:
+                st.error(f"❌ सही उत्तर: {correct_option}")
 
             st.session_state.current += 1
-
             st.rerun()
 
     else:
 
+        st.balloons()
+
         st.success("🎉 Quiz Completed!")
 
-        st.metric(
-            "Your Score",
-            f"{st.session_state.score}/{len(mcqs)}"
-        )
+        score = st.session_state.score
+        total = len(mcqs)
 
-        percent = (
-            st.session_state.score /
-            len(mcqs)
-        ) * 100
+        percent = (score / total) * 100
 
-        st.progress(int(percent))
+        st.metric("Score", f"{score}/{total}")
+        st.metric("Percentage", f"{percent:.1f}%")
 
-        st.write(f"Percentage : {percent:.1f}%")
+        if percent >= 90:
+            st.success("🏆 Gold Rank")
+        elif percent >= 70:
+            st.info("🥈 Silver Rank")
+        elif percent >= 50:
+            st.warning("🥉 Bronze Rank")
+        else:
+            st.error("📚 Practice More")
 
-        if st.button("Restart Quiz"):
+        if st.button("🔄 Restart Quiz"):
 
             del st.session_state.current
             del st.session_state.score
