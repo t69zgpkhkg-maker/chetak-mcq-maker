@@ -113,3 +113,66 @@ Format:
 
                 st.warning("Model returned non-JSON output.")
                 st.write(output)
+# ---------------- QUIZ ENGINE ---------------- #
+
+if "mcqs" in st.session_state:
+
+    st.divider()
+    st.header("📝 Quiz")
+
+    if "current" not in st.session_state:
+        st.session_state.current = 0
+        st.session_state.score = 0
+
+    mcqs = st.session_state.mcqs
+
+    if st.session_state.current < len(mcqs):
+
+        q = mcqs[st.session_state.current]
+
+        st.subheader(
+            f"Question {st.session_state.current+1}/{len(mcqs)}"
+        )
+
+        st.write(q["question"])
+
+        option = st.radio(
+            "Choose Answer",
+            q["options"],
+            key=f"q{st.session_state.current}"
+        )
+
+        if st.button("Next"):
+
+            if option == q["answer"]:
+                st.session_state.score += 1
+
+            st.session_state.current += 1
+
+            st.rerun()
+
+    else:
+
+        st.success("🎉 Quiz Completed!")
+
+        st.metric(
+            "Your Score",
+            f"{st.session_state.score}/{len(mcqs)}"
+        )
+
+        percent = (
+            st.session_state.score /
+            len(mcqs)
+        ) * 100
+
+        st.progress(int(percent))
+
+        st.write(f"Percentage : {percent:.1f}%")
+
+        if st.button("Restart Quiz"):
+
+            del st.session_state.current
+            del st.session_state.score
+            del st.session_state.mcqs
+
+            st.rerun()
