@@ -47,9 +47,9 @@ if uploaded_file:
             img_base64 = base64.b64encode(
                 buffer.getvalue()
             ).decode()
-  client = OpenAI(
-    api_key=st.secrets["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1"
+            client = OpenAI(
+                api_key=st.secrets["OPENROUTER_API_KEY"],
+                base_url="https://openrouter.ai/api/v1"
 )
                 
                 
